@@ -1,3 +1,6 @@
+// jshint esversion: 6
+// jshint node: true
+// jshint asi: true
 const express = require('express')
 const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
@@ -199,6 +202,22 @@ app.get('/tables/:TableName/meta', (req, res) => {
       items
     )
     res.render('meta', data)
+  }).catch((error) => {
+    res.json({error})
+  })
+})
+
+app.get('/tables/:TableName/indexes', (req, res) => {
+  const TableName = req.params.TableName
+  Promise.all([
+    describeTable({TableName}),
+    docClient.scan({TableName}).promise()
+  ]).then(([description, items]) => {
+    const data = Object.assign({},
+      description,
+      items
+    )
+    res.render('indexes', data)
   }).catch((error) => {
     res.json({error})
   })
